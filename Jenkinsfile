@@ -1,7 +1,4 @@
 node {
-    stage("Git clone") {
-        git credentialsId: 'GIT_HUB_CREDENTIALS', url: 'https://github.com/Pomeo44/ms-ticket.git',  branch: 'develop'
-    }
     stage('Maven build') {
         withMaven (maven: 'maven') {
             sh 'mvn -B -DskipTests clean package'
