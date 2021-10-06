@@ -9,13 +9,10 @@ node {
             sh 'mvn test'
         }
     }
-    stage("Docker login"){
+    stage("Docker build"){
         withCredentials([string(credentialsId: 'DOCKER_HUB_PASSWORD', variable: 'PASSWORD')]) {
             sh 'docker login -u pomeo44 -p $PASSWORD'
         }
-    }
-    stage("Docker build"){
-        sh 'docker version'
         sh 'docker build -t ms-ticket .'
         sh 'docker tag ms-ticket pomeo44/ms-ticket:jenkins'
         sh 'docker tag ms-ticket pomeo44/ms-ticket:$BUILD_NUMBER'
@@ -23,6 +20,11 @@ node {
     }
     stage("Docker push"){
         sh 'docker push pomeo44/ms-ticket -a'
+        try {
+            sh 'docker rmi $(docker images | grep ms-ticket)'
+        } catch (err) {
+            echo err.getMessage()
+        }
     }
     stage('Kubernetes deploy') {
         withKubeConfig([credentialsId: 'KUBERNETES_CREDENTIALS', serverUrl: "${CLUSTER_URL}", namespace: "${CLUSTER_NAMESPACE}"]) {
