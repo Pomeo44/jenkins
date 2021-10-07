@@ -29,6 +29,8 @@ node {
     stage('Kubernetes deploy') {
         withKubeConfig([credentialsId: 'KUBERNETES_CREDENTIALS', serverUrl: "${CLUSTER_URL}", namespace: "${CLUSTER_NAMESPACE}"]) {
             sh 'kubectl apply -f deployment.yaml'
+            sh 'kubectl apply -f service.yaml'
+            sh 'kubectl apply -f config-map.yaml'
         }
     }
 }
