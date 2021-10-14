@@ -29,6 +29,7 @@ node {
     stage('Kubernetes deploy') {
         withKubeConfig([credentialsId: 'KUBERNETES_CREDENTIALS', serverUrl: "${CLUSTER_URL}", namespace: "${CLUSTER_NAMESPACE}"]) {
             sh "helm upgrade ms-ticket ./helm --set image.tag=$BUILD_NUMBER"
+            sh "ls"
         }
     }
 }
