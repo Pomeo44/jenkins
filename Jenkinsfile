@@ -1,7 +1,4 @@
 node {
-    triggers {
-        pollSCM('')
-    }
     stage('Maven build') {
         withMaven (maven: 'maven') {
             sh 'mvn -B -DskipTests clean package'
