@@ -1,6 +1,6 @@
 node {
     stage("Git clone") {
-        git url: 'https://github.com/Pomeo44/ms-ticket.git',  branch: '$BRANCH_NAME'
+        git url: 'https://github.com/Pomeo44/ms-apigateway.git',  branch: '$BRANCH_NAME'
     }
     stage('Maven build') {
         withMaven (maven: 'maven') {
@@ -16,14 +16,14 @@ node {
         withCredentials([string(credentialsId: 'DOCKER_HUB_PASSWORD', variable: 'PASSWORD')]) {
             sh 'docker login -u pomeo44 -p $PASSWORD'
         }
-        sh 'docker build -t ms-ticket .'
-        sh 'docker tag ms-ticket pomeo44/ms-ticket:$BRANCH_NAME-$BUILD_NUMBER'
+        sh 'docker build -t ms-apigateway .'
+        sh 'docker tag ms-apigateway pomeo44/ms-apigateway:$BRANCH_NAME-$BUILD_NUMBER'
         sh 'docker images'
     }
     stage("Docker push"){
-        sh 'docker push pomeo44/ms-ticket -a'
+        sh 'docker push pomeo44/ms-apigateway:$BRANCH_NAME-$BUILD_NUMBER'
         try {
-            sh 'docker rmi $(docker images | grep ms-ticket)'
+            sh 'docker rmi $(docker images | grep ms-apigateway)'
         } catch (err) {
             echo err.getMessage()
         }
@@ -31,7 +31,7 @@ node {
     stage('Kubernetes deploy') {
         withKubeConfig([credentialsId: 'KUBERNETES_CREDENTIALS', serverUrl: '${CLUSTER_URL}', namespace: '${CLUSTER_NAMESPACE}']) {
             sh 'ls'
-            sh 'helm upgrade ms-ticket ./helm --set image.tag=$BRANCH_NAME-$BUILD_NUMBER'
+            sh 'helm upgrade ms-apigateway ./helm --set image.tag=$BRANCH_NAME-$BUILD_NUMBER'
         }
     }
 }
