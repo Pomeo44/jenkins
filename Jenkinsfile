@@ -1,4 +1,7 @@
 node {
+    stage("Git clone") {
+        git url: 'https://github.com/Pomeo44/ms-ticket.git',  branch: '$BRANCH_NAME'
+    }
     stage('Maven build') {
         withMaven (maven: 'maven') {
             sh 'mvn -B -DskipTests clean package'
@@ -14,8 +17,7 @@ node {
             sh 'docker login -u pomeo44 -p $PASSWORD'
         }
         sh 'docker build -t ms-ticket .'
-        sh 'docker tag ms-ticket pomeo44/ms-ticket:jenkins'
-        sh 'docker tag ms-ticket pomeo44/ms-ticket:$BUILD_NUMBER'
+        sh 'docker tag ms-ticket pomeo44/ms-ticket:$BRANCH_NAME-$BUILD_NUMBER'
         sh 'docker images'
     }
     stage("Docker push"){
@@ -27,9 +29,9 @@ node {
         }
     }
     stage('Kubernetes deploy') {
-        withKubeConfig([credentialsId: 'KUBERNETES_CREDENTIALS', serverUrl: "${CLUSTER_URL}", namespace: "${CLUSTER_NAMESPACE}"]) {
-            sh "ls"
-            sh "helm upgrade ms-ticket ./helm --set image.tag=$BUILD_NUMBER"
+        withKubeConfig([credentialsId: 'KUBERNETES_CREDENTIALS', serverUrl: '${CLUSTER_URL}', namespace: '${CLUSTER_NAMESPACE}']) {
+            sh 'ls'
+            sh 'helm upgrade ms-ticket ./helm --set image.tag=$BRANCH_NAME-$BUILD_NUMBER'
         }
     }
 }
