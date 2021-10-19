@@ -21,7 +21,7 @@ node {
         sh 'docker images'
     }
     stage("Docker push"){
-        sh 'docker push pomeo44/ms-ticket -a'
+        sh 'docker push pomeo44/ms-ticket:$BRANCH_NAME-$BUILD_NUMBER'
         try {
             sh 'docker rmi $(docker images | grep ms-ticket)'
         } catch (err) {
